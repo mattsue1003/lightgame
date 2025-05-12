@@ -3,33 +3,730 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>快速點燈</title>
-    <link rel="stylesheet" href="style.css">
+    <title>快速點燈遊戲 | Quick Light Game</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .selector-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
+        .btn-easy {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-hard {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-30s {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        .btn-60s {
+            background-color: #9C27B0;
+            color: white;
+        }
+        
+        .btn-start {
+            background-color: #2196F3;
+            color: white;
+            padding: 8px 20px;
+        }
+        
+        .btn-disabled {
+            background-color: #cccccc !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .cell {
+            background-color: #ddd;
+            border-radius: 5px;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .lit {
+            background-color: #FFEB3B;
+            box-shadow: 0 0 10px #FFEB3B;
+        }
+        
+        .trap {
+            background-color: #FF9800;
+            box-shadow: 0 0 10px #FF9800;
+        }
+        
+        .clicked {
+            background-color: #81C784;
+        }
+        
+        .wrong-click {
+            background-color: #EF5350;
+            animation: shake 0.5s;
+        }
+        
+        .messages {
+            text-align: center;
+            min-height: 24px;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .highscores {
+            margin-top: 20px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+        }
+        
+        .highscores h3 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .highscores-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 10px;
+        }
+        
+        .highscore-card {
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .highscore-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .highscore-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            color: #1877F2;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 5px;
+            background-color: #E7F3FF;
+            transition: background-color 0.2s;
+        }
+        
+        .social-link:hover {
+            background-color: #C7E0FF;
+        }
+        
+        .social-icon {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .countdown {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .countdown-number {
+            font-size: 100px;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 500px) {
+            .grid {
+                grid-gap: 8px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stat-box {
+                margin: 0;
+            }
+            
+            .highscores-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .selector-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
 </head>
 <body>
-
-    <div class="container">
-        <h1>快速點燈</h1>
-
+    <div class="game-container">
+        <h1>快速點燈遊戲</h1>
+        <p class="subtitle">點擊亮起的燈，看看你能在時間內完成多少個！</p>
+        
         <div class="controls">
-            <span>難度選擇：</span>
-            <button id="easyBtn">簡單 (3個正確燈)</button>
-            <button id="hardBtn">困難 (3個正確燈 + 1-2個誤導燈)</button>
-        </div>
-
-        <div class="game-info">
-            <div id="timer">時間: 60 秒</div>
-            <div id="score">分數: 0</div>
-        </div>
-
-        <div id="game-grid" class="grid">
+            <div class="control-row">
+                <div class="selector-group">
+                    <button id="easy-btn" class="btn-easy">簡單模式</button>
+                    <button id="hard-btn" class="btn-hard btn-disabled">困難模式</button>
+                </div>
+                <div class="selector-group">
+                    <button id="time-30-btn" class="btn-30s btn-disabled">30秒</button>
+                    <button id="time-60-btn" class="btn-60s">60秒</button>
+                </div>
             </div>
-
-        <div id="message" class="message">請選擇難度並點擊開始遊戲</div>
-
-        <button id="startBtn">開始遊戲</button>
+            <button id="start-btn" class="btn-start">開始遊戲</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">時間</div>
+                <div id="timer" class="stat-value">60</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">得分</div>
+                <div id="score" class="stat-value">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">本局模式</div>
+                <div id="current-mode" class="stat-value">簡單60秒</div>
+            </div>
+        </div>
+        
+        <div class="messages" id="message"></div>
+        
+        <div class="grid" id="game-grid">
+            <!-- Grid cells will be generated by JavaScript -->
+        </div>
+        
+        <div class="highscores">
+            <h3>最高紀錄</h3>
+            <div class="highscores-grid">
+                <div class="highscore-card">
+                    <div class="highscore-title">簡單模式 30秒</div>
+                    <div id="highscore-easy-30" class="highscore-value">0</div>
+                </div>
+                <div class="highscore-card">
+                    <div class="highscore-title">簡單模式 60秒</div>
+                    <div id="highscore-easy-60" class="highscore-value">0</div>
+                </div>
+                <div class="highscore-card">
+                    <div class="highscore-title">困難模式 30秒</div>
+                    <div id="highscore-hard-30" class="highscore-value">0</div>
+                </div>
+                <div class="highscore-card">
+                    <div class="highscore-title">困難模式 60秒</div>
+                    <div id="highscore-hard-60" class="highscore-value">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <a href="https://www.facebook.com/profile.php?id=100063748491881" target="_blank" class="social-link">
+                <span class="social-icon">👍</span> 鍾孟修Ｍatt-職能治療師 粉絲專頁
+            </a>
+            <p>鼓勵給我按讚追蹤，支持我創造更多的遊戲！</p>
+        </div>
+    </div>
+    
+    <div id="countdown" class="countdown hidden">
+        <div id="countdown-number" class="countdown-number">3</div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Game variables
+        let timer = 60;
+        let maxTime = 60; // Default game time
+        let score = 0;
+        let highScores = {
+            'easy-30': 0,
+            'easy-60': 0,
+            'hard-30': 0,
+            'hard-60': 0
+        };
+        let gameInterval = null;
+        let countdownInterval = null;
+        let isGameRunning = false;
+        let difficulty = 'easy'; // Default difficulty
+        let targetCells = [];
+        let trapCells = [];
+        let remainingTargets = 0;
+        
+        // DOM Elements
+        const gameGrid = document.getElementById('game-grid');
+        const timerElement = document.getElementById('timer');
+        const scoreElement = document.getElementById('score');
+        const currentModeElement = document.getElementById('current-mode');
+        const messageElement = document.getElementById('message');
+        const startButton = document.getElementById('start-btn');
+        const easyButton = document.getElementById('easy-btn');
+        const hardButton = document.getElementById('hard-btn');
+        const time30Button = document.getElementById('time-30-btn');
+        const time60Button = document.getElementById('time-60-btn');
+        const countdownElement = document.getElementById('countdown');
+        const countdownNumberElement = document.getElementById('countdown-number');
+        
+        // High score elements
+        const highScoreEasy30Element = document.getElementById('highscore-easy-30');
+        const highScoreEasy60Element = document.getElementById('highscore-easy-60');
+        const highScoreHard30Element = document.getElementById('highscore-hard-30');
+        const highScoreHard60Element = document.getElementById('highscore-hard-60');
+        
+        // Initialize the grid
+        function initializeGrid() {
+            gameGrid.innerHTML = '';
+            for (let i = 0; i < 16; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = i;
+                cell.addEventListener('click', handleCellClick);
+                gameGrid.appendChild(cell);
+            }
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            startButton.addEventListener('click', prepareGame);
+            easyButton.addEventListener('click', () => setDifficulty('easy'));
+            hardButton.addEventListener('click', () => setDifficulty('hard'));
+            time30Button.addEventListener('click', () => setGameTime(30));
+            time60Button.addEventListener('click', () => setGameTime(60));
+            
+            // Load high scores from local storage
+            loadHighScores();
+        }
+        
+        // Load high scores from local storage
+        function loadHighScores() {
+            const savedScores = localStorage.getItem('lightGameHighScores');
+            if (savedScores) {
+                try {
+                    highScores = JSON.parse(savedScores);
+                    updateHighScoreDisplay();
+                } catch (e) {
+                    console.error('Error parsing high scores:', e);
+                    // If there's an error, reset the high scores
+                    localStorage.removeItem('lightGameHighScores');
+                }
+            }
+        }
+        
+        // Save high scores to local storage
+        function saveHighScores() {
+            try {
+                localStorage.setItem('lightGameHighScores', JSON.stringify(highScores));
+                updateHighScoreDisplay();
+            } catch (e) {
+                console.error('Error saving high scores:', e);
+            }
+        }
+        
+        // Update high score display
+        function updateHighScoreDisplay() {
+            highScoreEasy30Element.textContent = highScores['easy-30'];
+            highScoreEasy60Element.textContent = highScores['easy-60'];
+            highScoreHard30Element.textContent = highScores['hard-30'];
+            highScoreHard60Element.textContent = highScores['hard-60'];
+        }
+        
+        // Set difficulty
+        function setDifficulty(level) {
+            difficulty = level;
+            if (level === 'easy') {
+                easyButton.classList.add('btn-easy');
+                easyButton.classList.remove('btn-disabled');
+                hardButton.classList.remove('btn-hard');
+                hardButton.classList.add('btn-disabled');
+            } else {
+                hardButton.classList.add('btn-hard');
+                hardButton.classList.remove('btn-disabled');
+                easyButton.classList.remove('btn-easy');
+                easyButton.classList.add('btn-disabled');
+            }
+            updateCurrentModeDisplay();
+        }
+        
+        // Set game time
+        function setGameTime(time) {
+            maxTime = time;
+            timer = time;
+            timerElement.textContent = timer;
+            
+            if (time === 30) {
+                time30Button.classList.add('btn-30s');
+                time30Button.classList.remove('btn-disabled');
+                time60Button.classList.remove('btn-60s');
+                time60Button.classList.add('btn-disabled');
+            } else {
+                time60Button.classList.add('btn-60s');
+                time60Button.classList.remove('btn-disabled');
+                time30Button.classList.remove('btn-30s');
+                time30Button.classList.add('btn-disabled');
+            }
+            updateCurrentModeDisplay();
+        }
+        
+        // Update current mode display
+        function updateCurrentModeDisplay() {
+            const difficultyText = difficulty === 'easy' ? '簡單' : '困難';
+            currentModeElement.textContent = `${difficultyText}${maxTime}秒`;
+        }
+        
+        // Prepare game with countdown
+        function prepareGame() {
+            if (isGameRunning) return;
+            
+            // Clear any previous intervals to prevent multiple timers
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
+            // Reset game state
+            timer = maxTime;
+            score = 0;
+            isGameRunning = false; // Ensure we're not in running state yet
+            timerElement.textContent = timer;
+            scoreElement.textContent = score;
+            messageElement.textContent = '';
+            
+            // Clear any previous lights
+            clearLights();
+            
+            // Update UI
+            startButton.textContent = '準備開始...';
+            startButton.classList.add('btn-disabled');
+            easyButton.disabled = true;
+            hardButton.disabled = true;
+            time30Button.disabled = true;
+            time60Button.disabled = true;
+            
+            // Show countdown
+            countdownElement.classList.remove('hidden');
+            let count = 3;
+            countdownNumberElement.textContent = count;
+            
+            countdownInterval = setInterval(() => {
+                count--;
+                countdownNumberElement.textContent = count;
+                
+                if (count <= 0) {
+                    if (countdownInterval) {
+                        clearInterval(countdownInterval);
+                        countdownInterval = null;
+                    }
+                    countdownElement.classList.add('hidden');
+                    startGame();
+                }
+            }, 1000);
+        }
+        
+        // Start the game
+        function startGame() {
+            // Set game as running
+            isGameRunning = true;
+            
+            // Generate new targets
+            generateTargets();
+            
+            // Start the timer
+            if (gameInterval) {
+                clearInterval(gameInterval);
+            }
+            
+            gameInterval = setInterval(() => {
+                timer--;
+                timerElement.textContent = timer;
+                
+                if (timer <= 0) {
+                    endGame();
+                }
+            }, 1000);
+            
+            // Update UI
+            startButton.textContent = '遊戲進行中';
+        }
+        
+        // Generate target cells
+        function generateTargets() {
+            clearLights();
+            
+            targetCells = [];
+            trapCells = [];
+            
+            // Always 3 target cells
+            while (targetCells.length < 3) {
+                const randomIndex = Math.floor(Math.random() * 16);
+                if (!targetCells.includes(randomIndex)) {
+                    targetCells.push(randomIndex);
+                }
+            }
+            
+            // Add trap cells in hard mode
+            if (difficulty === 'hard') {
+                const trapCount = Math.floor(Math.random() * 2) + 1; // 1-2 traps
+                while (trapCells.length < trapCount) {
+                    const randomIndex = Math.floor(Math.random() * 16);
+                    if (!targetCells.includes(randomIndex) && !trapCells.includes(randomIndex)) {
+                        trapCells.push(randomIndex);
+                    }
+                }
+            }
+            
+            // Light up cells
+            const cells = document.querySelectorAll('.cell');
+            targetCells.forEach(index => {
+                cells[index].classList.add('lit');
+            });
+            
+            trapCells.forEach(index => {
+                cells[index].classList.add('trap');
+            });
+            
+            remainingTargets = targetCells.length;
+        }
+        
+        // Handle cell click
+        function handleCellClick(event) {
+            if (!isGameRunning) return;
+            
+            const clickedIndex = parseInt(event.target.dataset.index);
+            
+            if (targetCells.includes(clickedIndex) && !event.target.classList.contains('clicked')) {
+                // Clicked on a target
+                event.target.classList.remove('lit');
+                event.target.classList.add('clicked');
+                remainingTargets--;
+                
+                // Check if all targets are clicked
+                if (remainingTargets === 0) {
+                    score++;
+                    scoreElement.textContent = score;
+                    
+                    // Generate new targets after a short delay
+                    setTimeout(() => {
+                        if (isGameRunning) {
+                            generateTargets();
+                        }
+                    }, 300);
+                }
+            } else if (trapCells.includes(clickedIndex)) {
+                // Clicked on a trap
+                event.target.classList.add('wrong-click');
+                messageElement.textContent = '小心! 這是陷阱！';
+                
+                // Remove the wrong-click class after animation completes
+                setTimeout(() => {
+                    event.target.classList.remove('wrong-click');
+                    messageElement.textContent = '';
+                }, 500);
+            } else if (!event.target.classList.contains('clicked')) {
+                // Clicked on an empty cell
+                event.target.classList.add('wrong-click');
+                
+                // Remove the wrong-click class after animation completes
+                setTimeout(() => {
+                    event.target.classList.remove('wrong-click');
+                }, 500);
+            }
+        }
+        
+        // Clear all lights
+        function clearLights() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.classList.remove('lit', 'trap', 'clicked', 'wrong-click');
+            });
+        }
+        
+        // End the game
+        function endGame() {
+            isGameRunning = false;
+            
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            
+            clearLights();
+            
+            // Get current game mode key
+            const modeKey = `${difficulty}-${maxTime}`;
+            
+            // Update high score if current score is higher
+            if (score > highScores[modeKey]) {
+                highScores[modeKey] = score;
+                saveHighScores();
+                messageElement.textContent = `遊戲結束！新的最高分: ${score}`;
+            } else {
+                messageElement.textContent = `遊戲結束！你的分數: ${score}`;
+            }
+            
+            // Reset UI
+            startButton.textContent = '再玩一次';
+            startButton.classList.remove('btn-disabled');
+            easyButton.disabled = false;
+            hardButton.disabled = false;
+            time30Button.disabled = false;
+            time60Button.disabled = false;
+        }
+        
+        // Initialize the game
+        function init() {
+            initializeGrid();
+            setupEventListeners();
+            setDifficulty('easy');
+            setGameTime(60);
+            updateHighScoreDisplay();
+        }
+        
+        // Start the game initialization
+        window.addEventListener('load', init);
+    </script>
 </body>
 </html>
